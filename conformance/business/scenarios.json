@@ -1,0 +1,686 @@
+{
+  "specVersion": "rpe-spec-0.3",
+  "strategy": "TP1",
+  "description": "Business conformance scenarios for the RPE v0.3 reference engine. TP1 is a deterministic test strategy, not FSRS-3. FSRS-3 numeric behavior is covered separately by ../fsrs3-vectors.json.",
+  "defaults": {
+    "dailyStudyAmount": 100,
+    "volumeMode": "merged",
+    "dailyReviewQuota": 50,
+    "dailyNewQuota": 30,
+    "reviewFillMode": "by_plan",
+    "studyOrder": "review_first",
+    "reviewOrder": "risk",
+    "newOrder": "book",
+    "allowVagueComplete": false,
+    "maxIntervalDays": 365,
+    "minIntervalDays": 1,
+    "forgotNextDay": true,
+    "sameDayGap": 5,
+    "maxAppearancesPerDay": 2,
+    "vagueMaxIntervalDays": 3,
+    "newWordsBlockedByBacklog": false,
+    "resumeDuePolicy": "keep",
+    "pressureBalance": "off",
+    "newReserveRatio": 0.2,
+    "dailyMaxReview": null,
+    "maxNewPerDay": null,
+    "overdueCapDays": null,
+    "knownUndoPolicy": "restore",
+    "planHorizonDays": 30,
+    "targetRetention": 0.9,
+    "dayCutoffMinutes": 240,
+    "timezone": "Asia/Shanghai",
+    "policyId": "tp1",
+    "policyVersion": "1.0",
+    "policyParams": {},
+    "policyParamsHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "cases": [
+    {
+      "id": "B01",
+      "description": "New item rated know becomes active; TP1 interval 10.",
+      "items": [{ "itemId": "w1" }],
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        }
+      ],
+      "expect": {
+        "events": 1,
+        "items": {
+          "w1": {
+            "lifecycle": "active",
+            "dueDay": 10,
+            "reps": 1,
+            "lapses": 0,
+            "stabilityDays": 10,
+            "difficulty": 5,
+            "lastReviewDay": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "B02",
+      "description": "A same-day repeat affects only the queue; long-term state is unchanged.",
+      "items": [{ "itemId": "w1" }],
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        },
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "same_day_repeat",
+          "commandId": "c2"
+        }
+      ],
+      "expect": {
+        "events": 2,
+        "items": {
+          "w1": {
+            "lifecycle": "active",
+            "dueDay": 10,
+            "reps": 1,
+            "lapses": 0,
+            "stabilityDays": 10
+          }
+        }
+      }
+    },
+    {
+      "id": "B03",
+      "description": "New item rated vague: TP1 interval 3, capped by vagueMaxIntervalDays=3.",
+      "items": [{ "itemId": "w1" }],
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "vague",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        }
+      ],
+      "expect": {
+        "items": {
+          "w1": {
+            "lifecycle": "active",
+            "dueDay": 3,
+            "reps": 1,
+            "lapses": 0,
+            "stabilityDays": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "B04",
+      "description": "New item rated forgot: forgotNextDay=true forces due tomorrow and increments lapses.",
+      "items": [{ "itemId": "w1" }],
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "forgot",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        }
+      ],
+      "expect": {
+        "items": {
+          "w1": {
+            "lifecycle": "active",
+            "dueDay": 1,
+            "reps": 1,
+            "lapses": 1,
+            "stabilityDays": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "B05",
+      "description": "An extra rating updates long-term state but does not consume the daily scheduled quota.",
+      "generate": [{ "prefix": "w", "count": 6 }],
+      "config": { "dailyStudyAmount": 5 },
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "extra",
+          "commandId": "c1"
+        },
+        { "op": "plan", "today": 0 }
+      ],
+      "expect": {
+        "events": 1,
+        "items": { "w1": { "lifecycle": "active", "dueDay": 10, "reps": 1 } },
+        "plan": {
+          "reviewTarget": 0,
+          "newTarget": 5,
+          "newIds": ["w2", "w3", "w4", "w5", "w6"]
+        }
+      }
+    },
+    {
+      "id": "B06",
+      "description": "markKnown is terminal and may override a same-day forgot rating.",
+      "items": [{ "itemId": "w1" }],
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "forgot",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        },
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "known",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c2"
+        }
+      ],
+      "expect": {
+        "events": 2,
+        "items": {
+          "w1": {
+            "lifecycle": "known",
+            "dueDay": null,
+            "reps": 1,
+            "lapses": 1
+          }
+        }
+      }
+    },
+    {
+      "id": "B07",
+      "description": "Merged mode: 80 due reviews and 50 new words with N=100 yields 80 reviews + 20 new.",
+      "generate": [
+        {
+          "prefix": "r",
+          "count": 80,
+          "lifecycle": "active",
+          "dueDay": 0,
+          "stabilityDays": 10,
+          "difficulty": 5
+        },
+        { "prefix": "n", "count": 50 }
+      ],
+      "config": { "dailyStudyAmount": 100 },
+      "steps": [{ "op": "plan", "today": 0 }],
+      "expect": {
+        "plan": {
+          "reviewTarget": 80,
+          "newTarget": 20,
+          "reviewCount": 80,
+          "newCount": 20,
+          "advancedCount": 0
+        }
+      }
+    },
+    {
+      "id": "B08",
+      "description": "Merged mode: review backlog fills the entire quota; no new words are introduced.",
+      "generate": [
+        {
+          "prefix": "r",
+          "count": 120,
+          "lifecycle": "active",
+          "dueDay": 0,
+          "stabilityDays": 10,
+          "difficulty": 5
+        },
+        { "prefix": "n", "count": 50 }
+      ],
+      "config": { "dailyStudyAmount": 100 },
+      "steps": [{ "op": "plan", "today": 0 }],
+      "expect": {
+        "plan": {
+          "reviewTarget": 100,
+          "newTarget": 0,
+          "reviewCount": 100,
+          "newCount": 0
+        }
+      }
+    },
+    {
+      "id": "B09",
+      "description": "Split mode uses independent review and new quotas.",
+      "generate": [
+        {
+          "prefix": "r",
+          "count": 80,
+          "lifecycle": "active",
+          "dueDay": 0,
+          "stabilityDays": 10,
+          "difficulty": 5
+        },
+        { "prefix": "n", "count": 50 }
+      ],
+      "config": {
+        "volumeMode": "split",
+        "dailyReviewQuota": 50,
+        "dailyNewQuota": 30
+      },
+      "steps": [{ "op": "plan", "today": 0 }],
+      "expect": {
+        "plan": {
+          "reviewTarget": 50,
+          "newTarget": 30,
+          "reviewCount": 50,
+          "newCount": 30
+        }
+      }
+    },
+    {
+      "id": "B10",
+      "description": "Split mode with newWordsBlockedByBacklog: an over-quota backlog blocks new words.",
+      "generate": [
+        {
+          "prefix": "r",
+          "count": 8,
+          "lifecycle": "active",
+          "dueDay": 0,
+          "stabilityDays": 10,
+          "difficulty": 5
+        },
+        { "prefix": "n", "count": 5 }
+      ],
+      "config": {
+        "volumeMode": "split",
+        "dailyReviewQuota": 5,
+        "dailyNewQuota": 3,
+        "newWordsBlockedByBacklog": true
+      },
+      "steps": [{ "op": "plan", "today": 0 }],
+      "expect": {
+        "plan": {
+          "reviewTarget": 5,
+          "newTarget": 0,
+          "reviewCount": 5,
+          "newCount": 0
+        }
+      }
+    },
+    {
+      "id": "B11",
+      "description": "Replanning subtracts scheduled work already completed today: N=100, 30 done, 50 due, 50 new -> 50+20.",
+      "generate": [
+        {
+          "prefix": "done",
+          "count": 30,
+          "lifecycle": "active",
+          "dueDay": 0,
+          "stabilityDays": 10,
+          "difficulty": 5
+        },
+        {
+          "prefix": "r",
+          "count": 50,
+          "lifecycle": "active",
+          "dueDay": 0,
+          "stabilityDays": 10,
+          "difficulty": 5
+        },
+        { "prefix": "n", "count": 50 }
+      ],
+      "config": { "dailyStudyAmount": 100 },
+      "steps": [
+        {
+          "op": "rate_many",
+          "prefix": "done",
+          "count": 30,
+          "rating": "know",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandPrefix": "c"
+        },
+        { "op": "plan", "today": 0 }
+      ],
+      "expect": {
+        "plan": {
+          "reviewTarget": 50,
+          "newTarget": 20,
+          "reviewCount": 50,
+          "newCount": 20
+        }
+      }
+    },
+    {
+      "id": "B12",
+      "description": "reviewFillMode=fill pulls future-due items into the review slot and reports them as advanced.",
+      "generate": [
+        {
+          "prefix": "d",
+          "count": 4,
+          "lifecycle": "active",
+          "dueDay": 0,
+          "stabilityDays": 10,
+          "difficulty": 5
+        },
+        {
+          "prefix": "f",
+          "count": 3,
+          "lifecycle": "active",
+          "dueDay": 5,
+          "stabilityDays": 10,
+          "difficulty": 5
+        },
+        { "prefix": "n", "count": 3 }
+      ],
+      "config": { "dailyStudyAmount": 10, "reviewFillMode": "fill" },
+      "steps": [{ "op": "plan", "today": 0 }],
+      "expect": {
+        "plan": {
+          "reviewTarget": 7,
+          "newTarget": 3,
+          "reviewIds": ["d1", "d2", "d3", "d4", "f1", "f2", "f3"],
+          "newIds": ["n1", "n2", "n3"],
+          "advancedIds": ["f1", "f2", "f3"]
+        }
+      }
+    },
+    {
+      "id": "B13",
+      "description": "A repeated commandId is idempotent: no second event and no second state update.",
+      "items": [{ "itemId": "w1" }],
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        },
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        }
+      ],
+      "expect": {
+        "events": 1,
+        "items": { "w1": { "reps": 1, "dueDay": 10 } }
+      }
+    },
+    {
+      "id": "B14",
+      "description": "sameDayGap=0 reinserts the current item immediately after itself.",
+      "steps": [
+        {
+          "op": "queue",
+          "queue": ["a", "b", "c"],
+          "currentId": "a",
+          "gap": 0
+        }
+      ],
+      "expect": { "queue": ["a", "b", "c"] }
+    },
+    {
+      "id": "B15",
+      "description": "sameDayGap=2 inserts after two remaining items.",
+      "steps": [
+        {
+          "op": "queue",
+          "queue": ["a", "b", "c", "d"],
+          "currentId": "a",
+          "gap": 2
+        }
+      ],
+      "expect": { "queue": ["b", "c", "a", "d"] }
+    },
+    {
+      "id": "B16",
+      "description": "sameDayGap=null appends the current item to the tail.",
+      "steps": [
+        {
+          "op": "queue",
+          "queue": ["a", "b", "c"],
+          "currentId": "a",
+          "gap": null
+        }
+      ],
+      "expect": { "queue": ["b", "c", "a"] }
+    },
+    {
+      "id": "B17",
+      "description": "S04: a vague item's same-day repeat knows it for the queue but does not move its long-term due day.",
+      "items": [{ "itemId": "w1" }],
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "vague",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        },
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "same_day_repeat",
+          "commandId": "c2"
+        }
+      ],
+      "expect": {
+        "events": 2,
+        "items": { "w1": { "dueDay": 3, "reps": 1, "lapses": 0, "stabilityDays": 3 } }
+      }
+    },
+    {
+      "id": "B18",
+      "description": "S06: a forgot item's same-day repeat does not add another lapse or change dueDay.",
+      "items": [{ "itemId": "w1" }],
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "forgot",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        },
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "same_day_repeat",
+          "commandId": "c2"
+        }
+      ],
+      "expect": {
+        "events": 2,
+        "items": { "w1": { "dueDay": 1, "reps": 1, "lapses": 1, "stabilityDays": 1 } }
+      }
+    },
+    {
+      "id": "B19",
+      "description": "S08: a history-review rating never updates long-term state.",
+      "items": [
+        {
+          "itemId": "w1",
+          "lifecycle": "active",
+          "dueDay": 10,
+          "lastReviewDay": 0,
+          "stabilityDays": 10,
+          "difficulty": 5,
+          "reps": 3
+        }
+      ],
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 10,
+          "context": "history_review",
+          "commandId": "c1"
+        }
+      ],
+      "expect": {
+        "events": 1,
+        "items": {
+          "w1": { "dueDay": 10, "reps": 3, "lastReviewDay": 0, "stabilityDays": 10 }
+        }
+      }
+    },
+    {
+      "id": "B20",
+      "description": "S09: history review followed by a scheduled rating updates state exactly once.",
+      "items": [
+        {
+          "itemId": "w1",
+          "lifecycle": "active",
+          "dueDay": 10,
+          "lastReviewDay": 0,
+          "stabilityDays": 10,
+          "difficulty": 5,
+          "reps": 3
+        }
+      ],
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 10,
+          "context": "history_review",
+          "commandId": "c1"
+        },
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 10,
+          "context": "scheduled",
+          "commandId": "c2"
+        }
+      ],
+      "expect": {
+        "events": 2,
+        "items": {
+          "w1": { "dueDay": 30, "reps": 4, "lastReviewDay": 10, "stabilityDays": 20 }
+        }
+      }
+    },
+    {
+      "id": "B21",
+      "description": "S14: by_plan does not pull future-due items; leftover quota goes to new words.",
+      "generate": [
+        {
+          "prefix": "d",
+          "count": 60,
+          "lifecycle": "active",
+          "dueDay": 0,
+          "stabilityDays": 10,
+          "difficulty": 5
+        },
+        {
+          "prefix": "f",
+          "count": 100,
+          "lifecycle": "active",
+          "dueDay": 5,
+          "stabilityDays": 10,
+          "difficulty": 5
+        },
+        { "prefix": "n", "count": 40 }
+      ],
+      "config": { "dailyStudyAmount": 100, "reviewFillMode": "by_plan" },
+      "steps": [{ "op": "plan", "today": 0 }],
+      "expect": {
+        "plan": {
+          "reviewTarget": 60,
+          "newTarget": 40,
+          "reviewCount": 60,
+          "newCount": 40,
+          "advancedCount": 0
+        }
+      }
+    },
+    {
+      "id": "B22",
+      "description": "S15: known items are excluded from both review and new pools.",
+      "items": [{ "itemId": "w1" }, { "itemId": "w2" }],
+      "config": { "dailyStudyAmount": 100 },
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "known",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        },
+        { "op": "plan", "today": 0 }
+      ],
+      "expect": {
+        "plan": { "reviewTarget": 0, "newTarget": 1, "newIds": ["w2"], "advancedCount": 0 }
+      }
+    },
+    {
+      "id": "B23",
+      "description": "S26: extra study after the quota is full updates state without reopening the plan.",
+      "items": [{ "itemId": "w1" }, { "itemId": "w2" }, { "itemId": "w3" }],
+      "config": { "dailyStudyAmount": 2 },
+      "steps": [
+        {
+          "op": "rate",
+          "itemId": "w1",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c1"
+        },
+        {
+          "op": "rate",
+          "itemId": "w2",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "scheduled",
+          "commandId": "c2"
+        },
+        {
+          "op": "rate",
+          "itemId": "w3",
+          "rating": "know",
+          "dayKey": 0,
+          "context": "extra",
+          "commandId": "c3"
+        },
+        { "op": "plan", "today": 0 }
+      ],
+      "expect": {
+        "events": 3,
+        "items": { "w3": { "lifecycle": "active", "dueDay": 10, "reps": 1 } },
+        "plan": { "reviewTarget": 0, "newTarget": 0, "reviewCount": 0, "newCount": 0 }
+      }
+    }
+  ]
+}

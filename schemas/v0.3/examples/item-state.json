@@ -1,0 +1,24 @@
+{
+  "userId": "u_001",
+  "itemId": "w:apple",
+  "lifecycle": "active",
+  "phase": "review",
+  "memory": {
+    "stabilityDays": 34.2,
+    "difficulty": 5.1
+  },
+  "schedule": {
+    "dueDay": 20478,
+    "lastReviewDay": 20444,
+    "lastIntervalDays": 12
+  },
+  "counters": {
+    "reps": 7,
+    "lapses": 1
+  },
+  "firstLearnedDay": 20310,
+  "knownAt": null,
+  "knownSnapshot": null,
+  "enrollmentEpoch": 1,
+  "version": 42
+}

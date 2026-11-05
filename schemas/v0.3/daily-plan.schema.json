@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpe.example/schemas/v0.3/daily-plan.schema.json",
+  "title": "DailyPlan",
+  "description": "RPE v0.3 每日计划。targets 与 reviewTarget/newTarget 同义。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "planId",
+    "dayKey",
+    "generatedAt",
+    "configHash",
+    "mode",
+    "targets",
+    "reviewItems",
+    "newItems",
+    "advancedItemIds",
+    "settledItemIds",
+    "completedItemIds",
+    "status",
+    "version"
+  ],
+  "properties": {
+    "planId": { "type": "string", "minLength": 1 },
+    "userId": { "type": ["string", "null"] },
+    "dayKey": { "type": "integer" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "configHash": { "type": "string", "minLength": 1 },
+    "mode": { "enum": ["merged", "split"] },
+    "targets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "review", "new"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "review": { "type": "integer", "minimum": 0 },
+        "new": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "reviewItems": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "newItems": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "advancedItemIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "settledItemIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "completedItemIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "status": { "enum": ["active", "completed", "superseded"] },
+    "version": { "type": "integer", "minimum": 1 }
+  }
+}

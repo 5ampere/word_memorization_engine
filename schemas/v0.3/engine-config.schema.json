@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpe.example/schemas/v0.3/engine-config.schema.json",
+  "title": "EngineConfig",
+  "description": "RPE v0.3 配置。序列化保持扁平，概念上分为 planner / time / policy 三组。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "dailyStudyAmount",
+    "volumeMode",
+    "reviewFillMode",
+    "studyOrder",
+    "reviewOrder",
+    "newOrder",
+    "allowVagueComplete",
+    "maxIntervalDays",
+    "minIntervalDays",
+    "forgotNextDay",
+    "sameDayGap",
+    "maxAppearancesPerDay",
+    "vagueMaxIntervalDays",
+    "newWordsBlockedByBacklog",
+    "resumeDuePolicy",
+    "pressureBalance",
+    "newReserveRatio",
+    "dailyMaxReview",
+    "maxNewPerDay",
+    "overdueCapDays",
+    "knownUndoPolicy",
+    "planHorizonDays",
+    "targetRetention",
+    "dayCutoffMinutes",
+    "timezone",
+    "policyId",
+    "policyVersion",
+    "policyParams",
+    "policyParamsHash"
+  ],
+  "properties": {
+    "dailyStudyAmount": { "type": "integer", "minimum": 0 },
+    "volumeMode": { "enum": ["merged", "split"] },
+    "dailyReviewQuota": { "type": "integer", "minimum": 0 },
+    "dailyNewQuota": { "type": "integer", "minimum": 0 },
+    "reviewFillMode": { "enum": ["by_plan", "fill"] },
+    "studyOrder": { "enum": ["review_first", "new_first", "shuffled"] },
+    "reviewOrder": { "enum": ["risk", "balanced", "reference_70_30", "custom"] },
+    "newOrder": { "enum": ["book", "random", "frequency", "priority"] },
+    "allowVagueComplete": { "type": "boolean" },
+    "maxIntervalDays": { "type": "integer", "minimum": 1 },
+    "minIntervalDays": { "type": "integer", "minimum": 1 },
+    "forgotNextDay": { "type": "boolean" },
+    "sameDayGap": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "null" }
+      ]
+    },
+    "maxAppearancesPerDay": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1 },
+        { "type": "null" }
+      ]
+    },
+    "vagueMaxIntervalDays": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1 },
+        { "type": "null" }
+      ]
+    },
+    "newWordsBlockedByBacklog": { "type": "boolean" },
+    "resumeDuePolicy": { "enum": ["keep", "today", "max"] },
+    "pressureBalance": { "enum": ["off", "reserve_new", "spread_backlog"] },
+    "newReserveRatio": { "type": "number", "minimum": 0, "maximum": 1 },
+    "dailyMaxReview": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1 },
+        { "type": "null" }
+      ]
+    },
+    "maxNewPerDay": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "null" }
+      ]
+    },
+    "overdueCapDays": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "type": "null" }
+      ]
+    },
+    "knownUndoPolicy": { "enum": ["restore", "relearn"] },
+    "planHorizonDays": { "type": "integer", "minimum": 1 },
+    "targetRetention": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1 },
+    "dayCutoffMinutes": { "type": "integer", "minimum": 0, "maximum": 720 },
+    "timezone": { "type": "string", "minLength": 1 },
+    "policyId": { "type": "string", "minLength": 1 },
+    "policyVersion": { "type": "string", "minLength": 1 },
+    "policyParams": { "type": "object" },
+    "policyParamsHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "volumeMode": { "const": "split" } }, "required": ["volumeMode"] },
+      "then": { "required": ["dailyReviewQuota", "dailyNewQuota"] }
+    },
+    {
+      "if": { "properties": { "pressureBalance": { "const": "spread_backlog" } }, "required": ["pressureBalance"] },
+      "then": { "required": ["dailyMaxReview"] }
+    }
+  ]
+}

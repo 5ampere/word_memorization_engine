@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpe.example/schemas/v0.3/export.schema.json",
+  "title": "RPEExport",
+  "description": "RPE v0.3 导入/导出包。mode=state_only 时 logs 可以为空，但必须保留 epoch 与 version。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "specVersion",
+    "schemaVersion",
+    "exportedAt",
+    "mode",
+    "config",
+    "items"
+  ],
+  "properties": {
+    "specVersion": { "const": "rpe-spec-0.3" },
+    "schemaVersion": { "const": 3 },
+    "exportedAt": { "type": "string", "format": "date-time" },
+    "mode": { "enum": ["state_only", "state_and_logs"] },
+    "config": { "$ref": "engine-config.schema.json" },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "item-state.schema.json" }
+    },
+    "logs": {
+      "type": "array",
+      "items": { "$ref": "study-event.schema.json" }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyId", "policyVersion", "params", "paramsHash"],
+      "properties": {
+        "policyId": { "type": "string" },
+        "policyVersion": { "type": "string" },
+        "params": { "type": "object" },
+        "paramsHash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "state_and_logs" } }, "required": ["mode"] },
+      "then": { "required": ["logs"] }
+    }
+  ]
+}

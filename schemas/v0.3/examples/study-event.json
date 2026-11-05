@@ -1,0 +1,22 @@
+{
+  "eventId": "evt_01J00000000000000000000000",
+  "commandId": "cmd_01J00000000000000000000000",
+  "userId": "u_001",
+  "itemId": "w:apple",
+  "enrollmentEpoch": 1,
+  "at": "2026-11-04T13:20:00Z",
+  "dayKey": 20456,
+  "timezone": "Asia/Shanghai",
+  "eventType": "study_rated",
+  "context": "scheduled",
+  "rating": "know",
+  "wasNew": false,
+  "elapsedDays": 12,
+  "scheduledIntervalDays": 12,
+  "policyIntervalDays": 24,
+  "intervalAfter": 24,
+  "queueAppearance": 1,
+  "policyId": "fsrs-3",
+  "policyVersion": "3.0",
+  "paramsHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+}

@@ -1,0 +1,20 @@
+{
+  "planId": "plan_01J00000000000000000000000",
+  "userId": "u_001",
+  "dayKey": 20456,
+  "generatedAt": "2026-11-04T00:05:00Z",
+  "configHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "mode": "merged",
+  "targets": {
+    "total": 100,
+    "review": 80,
+    "new": 20
+  },
+  "reviewItems": ["w:apple", "w:banana"],
+  "newItems": ["w:cherry"],
+  "advancedItemIds": [],
+  "settledItemIds": [],
+  "completedItemIds": [],
+  "status": "active",
+  "version": 1
+}

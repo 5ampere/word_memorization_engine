@@ -1,0 +1,127 @@
+{
+  "specVersion": "rpe-spec-0.3",
+  "schemaVersion": 3,
+  "exportedAt": "2026-11-05T00:00:00Z",
+  "mode": "state_and_logs",
+  "config": {
+    "dailyStudyAmount": 100,
+    "volumeMode": "merged",
+    "dailyReviewQuota": 50,
+    "dailyNewQuota": 30,
+    "reviewFillMode": "by_plan",
+    "studyOrder": "review_first",
+    "reviewOrder": "risk",
+    "newOrder": "book",
+    "allowVagueComplete": false,
+    "maxIntervalDays": 365,
+    "minIntervalDays": 1,
+    "forgotNextDay": true,
+    "sameDayGap": 5,
+    "maxAppearancesPerDay": null,
+    "vagueMaxIntervalDays": 3,
+    "newWordsBlockedByBacklog": false,
+    "resumeDuePolicy": "max",
+    "pressureBalance": "off",
+    "newReserveRatio": 0.2,
+    "dailyMaxReview": null,
+    "maxNewPerDay": null,
+    "overdueCapDays": null,
+    "knownUndoPolicy": "restore",
+    "planHorizonDays": 30,
+    "targetRetention": 0.9,
+    "dayCutoffMinutes": 240,
+    "timezone": "Asia/Shanghai",
+    "policyId": "fsrs-3",
+    "policyVersion": "3.0",
+    "policyParams": {
+      "weights": [
+        0.9605,
+        1.7234,
+        4.8527,
+        -1.1917,
+        -1.2956,
+        0.0573,
+        1.7352,
+        -0.1673,
+        1.065,
+        1.8907,
+        -0.3832,
+        0.5867,
+        1.0721
+      ]
+    },
+    "policyParamsHash": "sha256:94bba862fb4eb4d4656164d9f6f8d746e877d838110fe2984376fb24c7e8fb47"
+  },
+  "items": [
+    {
+      "userId": "u_001",
+      "itemId": "w:apple",
+      "lifecycle": "active",
+      "phase": "review",
+      "memory": {
+        "stabilityDays": 34.2,
+        "difficulty": 5.1
+      },
+      "schedule": {
+        "dueDay": 20480,
+        "lastReviewDay": 20456,
+        "lastIntervalDays": 24
+      },
+      "counters": {
+        "reps": 7,
+        "lapses": 1
+      },
+      "firstLearnedDay": 20310,
+      "knownAt": null,
+      "knownSnapshot": null,
+      "enrollmentEpoch": 1,
+      "version": 42
+    }
+  ],
+  "logs": [
+    {
+      "eventId": "evt_01J00000000000000000000000",
+      "commandId": "cmd_01J00000000000000000000000",
+      "userId": "u_001",
+      "itemId": "w:apple",
+      "enrollmentEpoch": 1,
+      "at": "2026-11-04T13:20:00Z",
+      "dayKey": 20456,
+      "timezone": "Asia/Shanghai",
+      "eventType": "study_rated",
+      "context": "scheduled",
+      "rating": "know",
+      "wasNew": false,
+      "elapsedDays": 12,
+      "scheduledIntervalDays": 12,
+      "policyIntervalDays": 24,
+      "intervalAfter": 24,
+      "queueAppearance": 1,
+      "policyId": "fsrs-3",
+      "policyVersion": "3.0",
+      "paramsHash": "sha256:94bba862fb4eb4d4656164d9f6f8d746e877d838110fe2984376fb24c7e8fb47"
+    }
+  ],
+  "policy": {
+    "policyId": "fsrs-3",
+    "policyVersion": "3.0",
+    "params": {
+      "weights": [
+        0.9605,
+        1.7234,
+        4.8527,
+        -1.1917,
+        -1.2956,
+        0.0573,
+        1.7352,
+        -0.1673,
+        1.065,
+        1.8907,
+        -0.3832,
+        0.5867,
+        1.0721
+      ]
+    },
+    "paramsHash": "sha256:94bba862fb4eb4d4656164d9f6f8d746e877d838110fe2984376fb24c7e8fb47"
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpe.example/schemas/v0.3/study-event.schema.json",
+  "title": "StudyEvent",
+  "description": "RPE v0.3 不可变学习事件。stateBefore/stateAfter 仅用于审计。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "eventId",
+    "commandId",
+    "at",
+    "dayKey",
+    "timezone",
+    "eventType"
+  ],
+  "properties": {
+    "eventId": { "type": "string", "minLength": 1 },
+    "commandId": { "type": "string", "minLength": 1 },
+    "userId": { "type": ["string", "null"] },
+    "itemId": { "type": ["string", "null"] },
+    "bookId": { "type": ["string", "null"] },
+    "enrollmentEpoch": { "type": ["integer", "null"], "minimum": 1 },
+    "oldEpoch": { "type": ["integer", "null"], "minimum": 1 },
+    "at": { "type": "string", "format": "date-time" },
+    "dayKey": { "type": "integer" },
+    "timezone": { "type": "string", "minLength": 1 },
+    "eventType": {
+      "enum": [
+        "item_selected",
+        "item_unselected",
+        "study_rated",
+        "marked_known",
+        "unmarked_known",
+        "item_deleted",
+        "item_suspended",
+        "item_resumed",
+        "plan_generated",
+        "plan_replanned",
+        "item_skipped",
+        "item_deferred",
+        "forced_complete",
+        "settings_changed",
+        "settings_migrated",
+        "day_rolled_over",
+        "policy_migrated",
+        "schedule_migrated",
+        "rating_corrected",
+        "state_imported",
+        "state_exported"
+      ]
+    },
+    "context": {
+      "oneOf": [
+        {
+          "enum": [
+            "scheduled",
+            "extra",
+            "same_day_repeat",
+            "today_review",
+            "history_review",
+            "free_review"
+          ]
+        },
+        { "type": "null" }
+      ]
+    },
+    "rating": {
+      "oneOf": [
+        { "enum": ["know", "vague", "forgot"] },
+        { "type": "null" }
+      ]
+    },
+    "wasNew": { "type": ["boolean", "null"] },
+    "elapsedDays": { "type": ["integer", "null"], "minimum": 0 },
+    "scheduledIntervalDays": { "type": ["integer", "null"], "minimum": 1 },
+    "policyIntervalDays": { "type": ["integer", "null"], "minimum": 1 },
+    "intervalAfter": { "type": ["integer", "null"], "minimum": 1 },
+    "stateBefore": { "type": ["object", "null"] },
+    "stateAfter": { "type": ["object", "null"] },
+    "knownSnapshot": { "type": ["object", "null"] },
+    "queueAppearance": { "type": ["integer", "null"], "minimum": 1 },
+    "appearances": { "type": ["integer", "null"], "minimum": 1 },
+    "sessionId": { "type": ["string", "null"] },
+    "planId": { "type": ["string", "null"] },
+    "targets": { "type": ["object", "null"] },
+    "advancedItemIds": {
+      "oneOf": [
+        { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        { "type": "null" }
+      ]
+    },
+    "version": { "type": ["integer", "null"], "minimum": 1 },
+    "policyId": { "type": ["string", "null"] },
+    "policyVersion": { "type": ["string", "null"] },
+    "policy": { "type": ["object", "null"] },
+    "paramsHash": { "type": ["string", "null"] },
+    "responseMs": { "type": ["number", "null"], "minimum": 0 },
+    "clientId": { "type": ["string", "null"] },
+    "deferredFrom": { "type": ["integer", "null"] },
+    "deferredTo": { "type": ["integer", "null"] },
+    "dueDay": { "type": ["integer", "null"] },
+    "targetEventId": { "type": ["string", "null"] },
+    "reason": { "type": ["string", "null"] },
+    "key": { "type": ["string", "null"] },
+    "old": {},
+    "new": {},
+    "oldRating": {
+      "oneOf": [
+        { "enum": ["know", "vague", "forgot"] },
+        { "type": "null" }
+      ]
+    },
+    "newRating": {
+      "oneOf": [
+        { "enum": ["know", "vague", "forgot"] },
+        { "type": "null" }
+      ]
+    },
+    "from": {},
+    "to": {},
+    "fromDay": { "type": ["integer", "null"] },
+    "toDay": { "type": ["integer", "null"] },
+    "schemaVersion": { "type": ["integer", "null"], "minimum": 1 },
+    "mode": {
+      "oneOf": [
+        { "enum": ["state_only", "state_and_logs"] },
+        { "type": "null" }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "eventType": { "const": "study_rated" } }, "required": ["eventType"] },
+      "then": {
+        "required": ["itemId", "context", "rating", "wasNew"],
+        "properties": {
+          "itemId": { "type": "string", "minLength": 1 },
+          "context": {
+            "enum": [
+              "scheduled",
+              "extra",
+              "same_day_repeat",
+              "today_review",
+              "history_review",
+              "free_review"
+            ]
+          },
+          "rating": { "enum": ["know", "vague", "forgot"] },
+          "wasNew": { "type": "boolean" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "eventType": { "const": "marked_known" } }, "required": ["eventType"] },
+      "then": {
+        "required": ["itemId", "knownSnapshot"],
+        "properties": {
+          "itemId": { "type": "string", "minLength": 1 },
+          "knownSnapshot": { "type": "object" },
+          "rating": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "eventType": { "const": "item_deferred" } }, "required": ["eventType"] },
+      "then": {
+        "required": ["itemId", "deferredFrom", "deferredTo"],
+        "properties": {
+          "itemId": { "type": "string", "minLength": 1 },
+          "deferredFrom": { "type": "integer" },
+          "deferredTo": { "type": "integer" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "eventType": { "const": "rating_corrected" } }, "required": ["eventType"] },
+      "then": {
+        "required": ["targetEventId"],
+        "properties": {
+          "targetEventId": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  ]
+}

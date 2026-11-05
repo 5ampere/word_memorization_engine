@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rpe.example/schemas/v0.3/item-state.schema.json",
+  "title": "ItemState",
+  "description": "RPE v0.3 条目状态。lifecycle 是权威状态；phase 仅用于展示。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "itemId",
+    "lifecycle",
+    "memory",
+    "schedule",
+    "counters",
+    "firstLearnedDay",
+    "knownAt",
+    "knownSnapshot",
+    "enrollmentEpoch",
+    "version"
+  ],
+  "properties": {
+    "userId": {
+      "type": ["string", "null"],
+      "minLength": 1
+    },
+    "itemId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lifecycle": {
+      "enum": ["unselected", "queued", "active", "known", "suspended", "deleted"]
+    },
+    "phase": {
+      "oneOf": [
+        { "enum": ["new", "learning", "review", "relearning"] },
+        { "type": "null" }
+      ]
+    },
+    "memory": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stabilityDays", "difficulty"],
+          "properties": {
+            "stabilityDays": { "type": "number", "minimum": 0 },
+            "difficulty": { "type": "number", "minimum": 1, "maximum": 10 }
+          }
+        }
+      ]
+    },
+    "schedule": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dueDay", "lastReviewDay", "lastIntervalDays"],
+          "properties": {
+            "dueDay": { "type": ["integer", "null"] },
+            "lastReviewDay": { "type": ["integer", "null"] },
+            "lastIntervalDays": { "type": ["integer", "null"], "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reps", "lapses"],
+      "properties": {
+        "reps": { "type": "integer", "minimum": 0 },
+        "lapses": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "firstLearnedDay": { "type": ["integer", "null"] },
+    "knownAt": { "type": ["string", "null"], "format": "date-time" },
+    "knownSnapshot": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["memory", "schedule", "phase"],
+          "properties": {
+            "memory": {
+              "oneOf": [
+                { "type": "null" },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["stabilityDays", "difficulty"],
+                  "properties": {
+                    "stabilityDays": { "type": "number", "minimum": 0 },
+                    "difficulty": { "type": "number", "minimum": 1, "maximum": 10 }
+                  }
+                }
+              ]
+            },
+            "schedule": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["dueDay", "lastReviewDay", "lastIntervalDays"],
+              "properties": {
+                "dueDay": { "type": ["integer", "null"] },
+                "lastReviewDay": { "type": ["integer", "null"] },
+                "lastIntervalDays": { "type": ["integer", "null"], "minimum": 1 }
+              }
+            },
+            "phase": {
+              "oneOf": [
+                { "enum": ["new", "learning", "review", "relearning"] },
+                { "type": "null" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "enrollmentEpoch": { "type": "integer", "minimum": 1 },
+    "version": { "type": "integer", "minimum": 0 }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "lifecycle": { "enum": ["unselected", "queued"] } },
+        "required": ["lifecycle"]
+      },
+      "then": {
+        "properties": {
+          "memory": { "type": "null" },
+          "schedule": { "type": "null" },
+          "knownAt": { "type": "null" },
+          "knownSnapshot": { "type": "null" },
+          "firstLearnedDay": { "type": "null" },
+          "counters": {
+            "properties": {
+              "reps": { "const": 0 },
+              "lapses": { "const": 0 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "lifecycle": { "const": "deleted" } }, "required": ["lifecycle"] },
+      "then": {
+        "properties": {
+          "memory": { "type": "null" },
+          "schedule": { "type": "null" },
+          "knownAt": { "type": "null" },
+          "knownSnapshot": { "type": "null" },
+          "firstLearnedDay": { "type": "null" },
+          "counters": {
+            "properties": {
+              "reps": { "const": 0 },
+              "lapses": { "const": 0 }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "lifecycle": { "const": "known" } }, "required": ["lifecycle"] },
+      "then": {
+        "properties": {
+          "knownAt": { "type": "string" },
+          "knownSnapshot": { "type": "object" }
+        }
+      }
+    }
+  ]
+}

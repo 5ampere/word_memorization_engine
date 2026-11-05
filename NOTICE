@@ -1,0 +1,20 @@
+RPE — Review Planning Engine
+Copyright (c) 2026 RPE contributors
+
+This product includes and refers to the following third-party work.
+
+1. FSRS / FSRS-3
+   The reference scheduling policy uses the FSRS-3 model, formulas, and default
+   weights from the open-spaced-repetition project.
+   Project: https://github.com/open-spaced-repetition/fsrs4anki
+   TypeScript implementation: https://github.com/open-spaced-repetition/ts-fsrs
+   License: MIT
+
+Trademark notice
+
+"墨墨背单词" / "MaiMemo" and related names and marks are the property of their
+respective owners. This project is independent and is not affiliated with,
+endorsed by, or sponsored by the owners of those marks. References to the
+product are descriptive and are based on publicly available documentation and
+community observation. This project does not include the reference product's
+code, word lists, definitions, mnemonics, audio, or other proprietary content.

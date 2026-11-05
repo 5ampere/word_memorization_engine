@@ -1,0 +1,122 @@
+{
+  "specVersion": "rpe-fsrs3-v1",
+  "policyId": "fsrs-3",
+  "policyVersion": "3.0",
+  "description": "Normative conformance vectors for the RPE FSRS-3 reference policy.",
+  "targetRetention": 0.9,
+  "maxIntervalDays": 365,
+  "vagueMaxIntervalDays": 3,
+  "tolerance": 0.001,
+  "weights": [
+    0.9605,
+    1.7234,
+    4.8527,
+    -1.1917,
+    -1.2956,
+    0.0573,
+    1.7352,
+    -0.1673,
+    1.065,
+    1.8907,
+    -0.3832,
+    0.5867,
+    1.0721
+  ],
+  "vectors": [
+    {
+      "id": "V1",
+      "description": "New word, first scheduled rating = know",
+      "input": {
+        "state": null,
+        "rating": "know",
+        "elapsedDays": 0
+      },
+      "expect": {
+        "stabilityDays": 4.4073,
+        "difficulty": 4.8527,
+        "retrievability": null,
+        "policyIntervalDays": 4,
+        "intervalDays": 4,
+        "lapsesDelta": 0
+      }
+    },
+    {
+      "id": "V2",
+      "description": "New word, first scheduled rating = forgot",
+      "input": {
+        "state": null,
+        "rating": "forgot",
+        "elapsedDays": 0
+      },
+      "expect": {
+        "stabilityDays": 0.9605,
+        "difficulty": 7.2361,
+        "retrievability": null,
+        "policyIntervalDays": 1,
+        "intervalDays": 1,
+        "lapsesDelta": 1
+      }
+    },
+    {
+      "id": "V3",
+      "description": "Review, know, on time at R = 0.9",
+      "input": {
+        "state": {
+          "stabilityDays": 10.0,
+          "difficulty": 5.0
+        },
+        "rating": "know",
+        "elapsedDays": 10
+      },
+      "expect": {
+        "stabilityDays": 36.045,
+        "difficulty": 4.9916,
+        "retrievability": 0.9,
+        "policyIntervalDays": 36,
+        "intervalDays": 36,
+        "lapsesDelta": 0
+      }
+    },
+    {
+      "id": "V4",
+      "description": "Review, vague: FSRS Hard interval is capped by the business rule",
+      "input": {
+        "state": {
+          "stabilityDays": 10.0,
+          "difficulty": 5.0
+        },
+        "rating": "vague",
+        "elapsedDays": 10
+      },
+      "expect": {
+        "stabilityDays": 30.751,
+        "difficulty": 6.2129,
+        "retrievability": 0.9,
+        "policyIntervalDays": 31,
+        "intervalDays": 3,
+        "lapsesDelta": 0
+      },
+      "notes": "policyIntervalDays=31 is the formula result; intervalDays=3 is the SCHED-005 cap."
+    },
+    {
+      "id": "V5",
+      "description": "Review, forgot: SCHED-004 forces next day, state still updates",
+      "input": {
+        "state": {
+          "stabilityDays": 10.0,
+          "difficulty": 5.0
+        },
+        "rating": "forgot",
+        "elapsedDays": 10
+      },
+      "expect": {
+        "stabilityDays": 3.767,
+        "difficulty": 7.4343,
+        "retrievability": 0.9,
+        "policyIntervalDays": 4,
+        "intervalDays": 1,
+        "lapsesDelta": 1
+      }
+    }
+  ]
+}
