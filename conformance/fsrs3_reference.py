@@ -1,7 +1,7 @@
 """Reference implementation of the RPE FSRS-3 policy.
 
 This module is intentionally dependency-free. It implements the normative
-formulas in docs/01-复习规划引擎-业务描述-v0.2.md §7.4.1, plus the
+formulas in docs/SPEC.md §7.4.1, plus the
 business-layer due-date overrides in §7.4 POLICY-006c.
 
 It is a conformance reference, not the engine. Daily planning, queues,
